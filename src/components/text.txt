@@ -1,0 +1,4 @@
+Make sure you replace 'YourPiHotspotName' and 'YourPassword' 
+with the actual SSID and password of your Raspberry Pi's hotspot.
+Also, ensure that you have installed the react-native-wifi-reborn 
+package and have the necessary permissions set in your app for Wi-Fi access.
