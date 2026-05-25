@@ -1,186 +1,303 @@
-import { StyleSheet, useColorScheme } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from './src/screens/HomeScreen';
-// import SettingScreen from './src/screens/SettingScreen';
-import { darkTheme } from './src/themes/darkTheme';
-import { lightTheme } from './src/themes/lightTheme';
-import AboutScreen from './src/screens/AboutScreen';
-import OnboardingScreen from './src/screens/OnboardingScreen';
-import ControlScreen from './src/screens/ControlScreen';
-import { Text, Modal, TextInput, Alert, Button, View } from 'react-native';
-import FuelLevelScreen from './src/screens/FuelLevelScreen';
+// App.jsx
+import React, {useEffect, useState, useRef} from 'react';
+import {
+  View,
+  Image,
+  Text,
+  StyleSheet,
+  StatusBar,
+  Platform,
+  ImageBackground,
+  AppState,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import PushNotification from 'react-native-push-notification';  // Import push notification
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
+
+// Screens
+
+import OnboardingScreen from './src/screens/OnboardingScreen';
+import LoginScreen from './src/screens/LoginScreen';
+import SignupScreen from './src/screens/SignupScreen';
+
+
+// Service Screens
+
+import Notifications from './src/screens/Notifications';
+
+
+// Assets
+import logo from './src/assets/images/1.png';
+import bgImage from './src/assets/images/3.png';
+import './global.css';
+import {AuthProvider} from './src/context/AuthContext';
+import DashboardScreen from './src/screens/DashboardScreen';
+import LoginOrSignUp from './src/screens/LoginOrSignUp';
+import VerifyScreen from './src/screens/VerifyScreen';
+import AddRoomScreen from './src/screens/AddRoomScreen';
+import AddRoomDevicesScreen from './src/screens/AddRoomDevicesScreen';
+
+// Navigators
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+const ServicesStack = createNativeStackNavigator();
 
-const App = () => {
-  const scheme = useColorScheme();
-  const [isDarkMode, setIsDarkMode] = useState(scheme === 'dark');
-  const [isVerified, setIsVerified] = useState(false);
-  const [pin, setPin] = useState('');
-  const [storedPin, setStoredPin] = useState(''); // Store your actual PIN here
-  const [modalVisible, setModalVisible] = useState(true);  // Modal opens by default
-  const [isFirstLaunch, setIsFirstLaunch] = useState(null);  // Track first launch
+// function ServicesNav() {
+//   return (
+//     <ServicesStack.Navigator screenOptions={{headerShown: false}}>
+//       <ServicesStack.Screen name="MoreServicesMain" component={MoreServices} />
+//       <ServicesStack.Screen name="BuyAirtime" component={Airtime} />
+//       <ServicesStack.Screen name="MoreServices" component={ServicesNav} />
+//     </ServicesStack.Navigator>
+//   );
+// }
 
-  // Fetch PIN from ESP32 on component mount
-  useEffect(() => {
-    // const fetchPin = async () => {
-    //   try {
-    //     const response = await axios.get('http://192.168.0.190/pin'); // Replace with ESP32 IP
-    //     setStoredPin(response.data); // Store the fetched PIN from ESP32
-    //     // console.log(response.data)
-    //   } catch (error) {
-    //     console.error('Error :', error);
-    //     Alert.alert('Error Initializing PIN Verification', 'Ensure The Hardware is Powered On.');
-
-    //   }
-    // };
-    // fetchPin();
-
-    setStoredPin('1234')
-
-    // Create a notification channel for Android 8.0 and above
-    PushNotification.createChannel(
-      {
-        channelId: "fuel_alert_channel",  // The channel ID
-        channelName: "Fuel Alert Notifications",  // The channel name
-        channelDescription: "Notification channel for fuel alerts",  // Channel description
-        soundName: "default",  // Sound name
-        importance: 4,  // Importance level (1 is low, 4 is high)
-        vibrate: true,  // Enable vibration
-      },
-      (created) => console.log(`Notification channel created: ${created}`)
-    );
-
-    // Trigger local push notification
-    PushNotification.localNotification({
-      channelId: "fuel_alert_channel",  
-      title: 'Hey There!', // Notification title
-      message: 'Welcome back to GenPilot!', // Notification message
-      playSound: true,  // Play sound
-      soundName: 'default', // Default notification sound
-      priority: 'high', // Set priority to high
-    });
+// const ProfileStackScreen = () => (
+//   <Stack.Navigator screenOptions={{headerShown: false}}>
+//     <Stack.Screen name="Profile" component={ProfileScreen} />
     
-  }, []);
+//   </Stack.Navigator>
+// );
 
-  // PIN verification logic
-  const handlePinSubmit = () => {
-    // console.log('pin',pin) ;console.log('from esp',storedPin) ;
-    if (pin == storedPin) {
-      setIsVerified(true);
-      setModalVisible(false);  // Hide the modal once PIN is correct
-    } else {
-      Alert.alert('Incorrect PIN', 'The PIN you entered is incorrect. Please try again.');
+// Tab Navigation
+// const MyTabs = () => (
+//   <Tab.Navigator
+//     screenOptions={({route}) => ({
+//       headerShown: false,
+//       tabBarIcon: ({focused, color}) => {
+//         let Icon;
+//         const iconProps = {color: focused ? '#000' : color, size: 24};
+//         switch (route.name) {
+//           case 'Home':
+//             Icon = HomeIcon;
+//             break;
+//           case 'Fund':
+//             Icon = PlusIcon;
+//             break;
+//           case 'Transaction':
+//             Icon = Square3Stack3DIcon;
+//             break;
+//           case 'Profile':
+//             Icon = UsersIcon;
+//             break;
+//         }
+//         return (
+//           <View
+//             style={[styles.iconWrapper, focused ? styles.focusedIcon : null]}>
+//             <Icon {...iconProps} />
+//           </View>
+//         );
+//       },
+//       tabBarActiveTintColor: 'black',
+//       tabBarInactiveTintColor: 'black',
+//       tabBarLabelStyle: {fontWeight: 'bold'},
+//       tabBarStyle: [
+//         styles.tabBar,
+//         Platform.OS === 'android' && {height: 65},
+//         Platform.OS === 'ios' && {height: 70},
+//       ],
+//     })}>
+//     <Tab.Screen name="Home" component={HomeScreen} />
+//     <Tab.Screen name="Fund" component={FundWallet} />
+//     <Tab.Screen name="Transaction" component={TransactionScreen} />
+//     <Tab.Screen
+//       name="Profile"
+//       component={ProfileStackScreen}
+//       listeners={({navigation, route}) => ({
+//         tabPress: e => {
+//           const state = navigation.getState();
+//           const isFocused =
+//             state.index === state.routes.findIndex(r => r.key === route.key);
+//           if (isFocused) {
+//             e.preventDefault();
+//             navigation.navigate('Profile', {screen: 'Profile'});
+//           }
+//         },
+//       })}
+//     />
+//   </Tab.Navigator>
+// );
+
+// App Root
+export default function App() {
+  const [isFirstLaunch, setIsFirstLaunch] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [shouldCheckAuth, setShouldCheckAuth] = useState(0);
+  const appState = useRef(AppState.currentState);
+  const logoutTimeout = useRef(null);
+  // Handle app state changes for auto logout
+  useEffect(() => {
+   // Define timeout reference outside handler
+
+  const handleAppStateChange = async (nextAppState) => {
+    console.log('App state changed from', appState.current, 'to', nextAppState);
+
+    // App going to background — start 30s logout timer
+    if (
+      appState.current.match(/active|foreground/) &&
+      nextAppState === 'background'
+    ) {
+      console.log('App is going to background — starting logout timer');
+      logoutTimeout.current = setTimeout(async () => {
+        console.log('App stayed in background — logging out user');
+        await AsyncStorage.removeItem('auth_token');
+        setShouldCheckAuth(prev => prev + 1);
+      }, 30000); // 30 seconds
+    }
+
+    // App coming back to foreground — cancel logout timer
+    if (
+      appState.current.match(/inactive|background/) &&
+      nextAppState === 'active'
+    ) {
+      if (logoutTimeout.current) {
+        clearTimeout(logoutTimeout.current);
+        logoutTimeout.current = null;
+        console.log('User returned — logout timer cancelled');
+      }
+      setShouldCheckAuth(prev => prev + 1);
+    }
+
+    appState.current = nextAppState;
+  };
+
+  const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+  return () => {
+    subscription?.remove();
+    if (logoutTimeout.current) {
+      clearTimeout(logoutTimeout.current);
     }
   };
-
-  // Function to toggle themes
-  const toggleTheme = () => {
-    setIsDarkMode(prevMode => !prevMode);
-  };
+}, []);
 
 
   useEffect(() => {
-    const checkFirstLaunch = async () => {
+    const initializeApp = async () => {
       try {
         const hasLaunched = await AsyncStorage.getItem('hasLaunched');
-        if (hasLaunched === null) {
-          setIsFirstLaunch(true);
-        } else {
-          setIsFirstLaunch(false);
-        }
+        const userToken = await AsyncStorage.getItem('auth_token');
+
+        setIsFirstLaunch(hasLaunched === null);
+        setIsAuthenticated(!!userToken);
+
+        console.log('Auth check - Has launched:', hasLaunched !== null);
+        console.log('Auth check - Token exists:', !!userToken);
       } catch (error) {
-        console.error('Error checking first launch:', error);
+        console.error('App init error:', error);
+        setIsAuthenticated(false);
+      } finally {
+        setTimeout(() => setIsLoading(false), 2000);
       }
     };
 
-    checkFirstLaunch();
-  }, []);
+    initializeApp();
+  }, [shouldCheckAuth]); // Re-run when shouldCheckAuth changes
 
-  if (isFirstLaunch === null) {
-    return null;  // Render nothing while checking the first launch status
+  if (isLoading || isFirstLaunch === null) {
+    return (
+      <ImageBackground source={bgImage} style={styles.backgroundImage}>
+        <View style={styles.overlay}>
+          <Image source={logo} style={styles.logo} />
+          <Text style={styles.splashText}>SmartRob</Text>
+        </View>
+      </ImageBackground>
+    );
   }
 
+  // const initialRoute = isFirstLaunch
+  //   ? 'Onboarding'
+  //   : isAuthenticated
+  //   ? 'Dashboard'
+  //   : 'Login';
+
+  const initialRoute = isFirstLaunch
+    ? 'Dashboard'
+    // ? 'Onboarding'
+    : isAuthenticated
+    ? 'Dashboard'
+    : 'LoginOrSignUp';
+
   return (
-    <NavigationContainer theme={isDarkMode ? darkTheme : lightTheme}>
-      {/* Global PIN modal */}
-      <Modal
-        visible={modalVisible && !isVerified}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => {}} // Disable closing the modal manually
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text>Enter Controller PIN</Text>
-            <TextInput
-              keyboardType="numeric"
-              style={styles.input}
-              placeholder="Enter PIN"
-              secureTextEntry
-              value={pin}
-              onChangeText={setPin}
-            />
-            <Button title="Submit" onPress={handlePinSubmit} />
-          </View>
-        </View>
-      </Modal>
+    <>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <AuthProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{headerShown: false}}
+            initialRouteName={initialRoute}>
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <Stack.Screen name="LoginOrSignUp" component={LoginOrSignUp} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Signup" component={SignupScreen} />
+            <Stack.Screen name="Verify" component={VerifyScreen} />
+            
 
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen name="Onboard">
-          {(props) => <OnboardingScreen {...props} toggleTheme={toggleTheme} isDarkMode={isDarkMode} />}
-        </Stack.Screen>
+            <Stack.Screen name="Dashboard" component={DashboardScreen} />
+            <Stack.Screen name="AddRoom" component={AddRoomScreen} />
+            <Stack.Screen name="AddRoomDevices" component={AddRoomDevicesScreen} />
 
-        <Stack.Screen name="Home">
-          {(props) => <HomeScreen {...props} toggleTheme={toggleTheme} isDarkMode={isDarkMode} isVerified={isVerified} />}
-        </Stack.Screen> */}
 
-        {isFirstLaunch && (
-          <Stack.Screen name="Onboard">
-            {(props) => <OnboardingScreen {...props} toggleTheme={toggleTheme} isDarkMode={isDarkMode} />}
-          </Stack.Screen>
-        )}
-        <Stack.Screen name="Home">
-            {(props) => <HomeScreen {...props} toggleTheme={toggleTheme} isDarkMode={isDarkMode} isVerified={isVerified} />}
-        </Stack.Screen>
-        <Stack.Screen name="FuelLevel">
-          {(props) => <FuelLevelScreen {...props} toggleTheme={toggleTheme} isDarkMode={isDarkMode} isVerified={isVerified} />}
-        </Stack.Screen>
-        <Stack.Screen name="Control">
-          {(props) => <ControlScreen {...props} toggleTheme={toggleTheme} isDarkMode={isDarkMode} isVerified={isVerified} />}
-        </Stack.Screen>
-        <Stack.Screen name="About">
-          {(props) => <AboutScreen {...props} toggleTheme={toggleTheme} isDarkMode={isDarkMode} isVerified={isVerified} />}
-        </Stack.Screen>
-      </Stack.Navigator>
-    </NavigationContainer>
+            {/* <Stack.Screen name="Dashboard" component={MyTabs} /> */}
+             {/*<Stack.Screen name="CreatePin" component={CreatePinScreen} /> */}
+            {/* <Stack.Screen name="MoreServices" component={ServicesNav} /> */}
+            <Stack.Screen name="Notifications" component={Notifications} />
+            
+           
+           
+          </Stack.Navigator>
+        </NavigationContainer>
+      </AuthProvider>
+    </>
   );
-};
+}
 
+// Styles
 const styles = StyleSheet.create({
-  modalContainer: {
+  backgroundImage: {
     flex: 1,
+    resizeMode: 'cover',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalContent: {
-    backgroundColor: 'white',
+  overlay: {
+    flex: 1,
+    backgroundColor: '#10002BCC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    resizeMode: 'contain',
+  },
+  splashText: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginTop: 10,
+  },
+  tabBar: {
+    backgroundColor: '#ffffff',
+    paddingVertical: 5,
+    borderTopWidth: 0,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    paddingBottom: Platform.OS === 'ios' ? 10 : 0,
+  },
+  iconWrapper: {
     padding: 20,
     borderRadius: 10,
-    alignItems: 'center',
+    backgroundColor: 'transparent',
   },
-  input: {
-    borderBottomWidth: 1,
-    width: '80%',
-    marginBottom: 20,
-    padding: 10,
+  focusedIcon: {
+    backgroundColor: '#D9D9D9',
   },
 });
-
-export default App;

@@ -33,18 +33,13 @@ local.properties
 .cxx/
 *.keystore
 !debug.keystore
+.kotlin/
 
 # node.js
 #
 node_modules/
 npm-debug.log
 yarn-error.log
-ios/build/
-android/.gradle/
-android/app/build/
-*.iml
-.idea/
-*.log
 
 # fastlane
 #
