@@ -38,6 +38,7 @@ import LoginOrSignUp from './src/screens/LoginOrSignUp';
 import VerifyScreen from './src/screens/VerifyScreen';
 import AddRoomScreen from './src/screens/AddRoomScreen';
 import AddRoomDevicesScreen from './src/screens/AddRoomDevicesScreen';
+import RoomDetailsScreen from './src/screens/RoomDetailsScreen';
 
 // Navigators
 const Stack = createNativeStackNavigator();
@@ -239,6 +240,7 @@ export default function App() {
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
             <Stack.Screen name="AddRoom" component={AddRoomScreen} />
             <Stack.Screen name="AddRoomDevices" component={AddRoomDevicesScreen} />
+            <Stack.Screen name="RoomDetailsScreen" component={RoomDetailsScreen} />
 
 
             {/* <Stack.Screen name="Dashboard" component={MyTabs} /> */}

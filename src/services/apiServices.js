@@ -1,7 +1,7 @@
 import axios from 'axios';
 import api from './api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const BASE_URL = 'https://cashpoint.deovaze.com/api';
+const BASE_URL = 'http://localhost/smart/api';
 // Authentication APIs
 export const authAPI = {
   // login: async (email, password) => {

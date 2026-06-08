@@ -41,10 +41,11 @@ const DashboardScreen = () => {
     { title: "Smart plugs", devices: "12 Devices connected", isOn: false, icon: "power-plug" },
   ];
 
-  const frequentlyUsed = [
-    { title: "Smart Generators", status: "Connected", isOn: true, icon: "engine" },
-    { title: "Smart Plugs", status: "Connected", isOn: true, icon: "power-plug" },
-    { title: "Air Conditioner", status: "Not Connected", isOn: false, icon: "air-conditioner" },
+  const generalControl = [
+    { title: "Smart Generator", status: "Connected", isOn: true, icon: "engine" },
+    { title: "Main Door", status: "Not Connected", isOn: false, icon: "door" },
+    { title: "All Plugs", status: "Connected", isOn: true, icon: "power-plug" },
+    { title: "All ACs", status: "Not Connected", isOn: false, icon: "air-conditioner" },
   ];
 
   return (
@@ -154,11 +155,11 @@ const DashboardScreen = () => {
         {/* FREQUENTLY USED */}
         <View className="px-5 mt-4 mb-16">
           <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-white text-base font-bold">Frequently Used</Text>
+            <Text className="text-white text-base font-bold">General Controls</Text>
             <Text className="text-[#C77DFF] text-sm">See All</Text>
           </View>
 
-          {frequentlyUsed.map((item, index) => (
+          {generalControl.map((item, index) => (
             <View
               key={index}
               className="bg-[#C77DFF] p-4 rounded-xl flex-row justify-between items-center mb-3"

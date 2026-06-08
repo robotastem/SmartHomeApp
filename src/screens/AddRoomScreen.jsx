@@ -83,7 +83,17 @@ const AddRoomScreen = () => {
         {/* ROOM LIST */}
         <View className="px-5 mt-6">
           {rooms.map((room, index) => (
-            <TouchableOpacity key={index} className="mb-5 rounded-2xl overflow-hidden">
+            // <TouchableOpacity key={index} className="mb-5 rounded-2xl overflow-hidden">
+              <TouchableOpacity
+                key={index}
+                className="mb-5 rounded-2xl overflow-hidden"
+                onPress={() =>
+                  navigation.navigate("RoomDetailsScreen", {
+                    roomName: room.name,
+                    roomImage: room.image,
+                  })
+                }
+              >
               <Image
                 source={room.image}
                 className="w-full h-40"
